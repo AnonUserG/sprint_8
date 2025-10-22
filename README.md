@@ -14,7 +14,7 @@
 
 1. Клонируй ветку main из репозитория используя git bash
    ```bash
-   git clone --branch main --single-branch https://github.com/AnonUserG/sprint8_security.git
+   git clone --branch main --single-branch https://github.com/AnonUserG/sprint_8.git
 2. Запусти на машине Docker
 3. Перейди в папку с проектом
 4. Подними проект (тесты прогонятся автоматически)
