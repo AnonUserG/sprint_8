@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Заказы</title>
+</head>
+
+<body>
+<div style="float:right;">
+    <div sec:authorize="isAuthenticated()">
+        <b th:text="${#authentication?.name}">user</b> |
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+            <button type="submit" style="background:none;border:none;color:blue;cursor:pointer;">
+                Выйти
+            </button>
+        </form>
+    </div>
+
+    <div sec:authorize="isAnonymous()">
+        <a href="/oauth2/authorization/keycloak">Войти</a>
+    </div>
+</div>
+
+<a th:href="@{/cart/items}" style="float:right;">
+    <b>КОРЗИНА &cudarrr;</b>
+</a>
+<a th:href="@{/main/items}" style="float:right;">
+    <b>ГЛАВНАЯ &cudarrr;</b>
+</a>
+<table style="width:70%;margin-left:auto;margin-right:auto;">
+    <tr th:each="order : ${orders}">
+        <td>
+            <h2>
+                <a th:text="'Заказ №' + ${order.id}" th:href="@{'/orders/' + ${order.id}}"></a>
+            </h2>
+            <table>
+                <tr th:each="item : ${order.items}">
+                    <td th:text="${item.item.title + ' (' + item.count + ' шт.) ' + item.total + ' руб.'}"></td>
+                </tr>
+            </table>
+            <p><b th:text="'Сумма: ' + ${order.total} + ' руб.'"></b></p>
+        </td>
+    </tr>
+</table>
+</body>
+
+</html>

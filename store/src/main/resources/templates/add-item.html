@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить товар</title>
+</head>
+<body>
+<div style="float:right;">
+    <div sec:authorize="isAuthenticated()">
+        <b th:text="${#authentication?.name}">user</b> |
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+            <button type="submit" style="background:none;border:none;color:blue;cursor:pointer;">
+                Выйти
+            </button>
+        </form>
+    </div>
+
+    <div sec:authorize="isAnonymous()">
+        <a href="/oauth2/authorization/keycloak">Войти</a>
+    </div>
+</div>
+
+<h2 style="text-align:center;">Добавить новый товар</h2>
+
+<form th:action="@{/admin/addItem}" method="post" style="width:50%;margin:auto;">
+    <p>
+        <label for="title">Название:</label><br>
+        <input type="text" id="title" name="title" required>
+    </p>
+    <p>
+        <label for="description">Описание:</label><br>
+        <textarea id="description" name="description" rows="3" cols="40"></textarea>
+    </p>
+    <p>
+        <label for="imgPath">Путь к изображению:</label><br>
+        <input type="text" id="imgPath" name="imgPath" placeholder="Изображение должно лежать в store/src/main/resources/static/" size="55">
+    </p>
+    <p>
+        <label for="price">Цена:</label><br>
+        <input type="number" step="0.01" id="price" name="price" required>
+    </p>
+    <p>
+        <label for="count">Количество:</label><br>
+        <input type="number" id="count" name="count" min="0" value="0">
+    </p>
+    <p>
+        <button type="submit">Добавить</button>
+    </p>
+</form>
+
+
+<p style="text-align:center;">
+    <a th:href="@{/main/items}">← Вернуться к витрине</a>
+</p>
+
+</body>
+</html>

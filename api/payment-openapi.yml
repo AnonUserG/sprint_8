@@ -1,0 +1,104 @@
+openapi: 3.0.3
+info:
+  title: Payment Service API
+  version: "1.0.0"
+  description: API для сервиса платежей
+
+servers:
+  - url: http://payments:8081
+    description: Local payments service
+
+paths:
+  /api/payments/{accountId}/balance:
+    get:
+      summary: Получить баланс счета
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Баланс найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+        '404':
+          description: Аккаунт не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/payments/pay:
+    post:
+      summary: Совершить платёж
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '200':
+          description: Платёж успешен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '402':
+          description: Недостаточно средств
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Некорректный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    BalanceResponse:
+      type: object
+      properties:
+        accountId:
+          type: string
+        balance:
+          type: number
+          format: double
+
+    PaymentRequest:
+      type: object
+      properties:
+        accountId:
+          type: string
+        orderId:
+          type: string
+        amount:
+          type: number
+          format: double
+      required:
+        - accountId
+        - orderId
+        - amount
+
+    PaymentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        transactionId:
+          type: string
+        error:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string

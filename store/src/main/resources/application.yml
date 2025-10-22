@@ -1,0 +1,66 @@
+spring:
+  application:
+    name: onlineStore
+  output:
+    ansi:
+      enabled: ALWAYS
+
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: store-client
+            authorization-grant-type: authorization_code
+            scope: openid, profile, email
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+          payments:
+            provider: keycloak
+            client-id: payments-api
+            client-secret: payments-secret
+            authorization-grant-type: client_credentials
+            scope: openid
+        provider:
+          keycloak:
+            authorization-uri: ${OAUTH2_AUTHORIZATION_URI:http://localhost:9090/realms/store-realm/protocol/openid-connect/auth}
+            token-uri: ${OAUTH2_TOKEN_URI:http://localhost:9090/realms/store-realm/protocol/openid-connect/token}
+            user-info-uri: ${OAUTH2_USER_INFO_URI:http://localhost:9090/realms/store-realm/protocol/openid-connect/userinfo}
+            jwk-set-uri: ${OAUTH2_JWK_SET_URI:http://localhost:9090/realms/store-realm/protocol/openid-connect/certs}
+
+  r2dbc:
+    url: r2dbc:h2:mem:///mydb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+
+  sql:
+    init:
+      mode: always
+
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+    cache:
+      redis:
+        time-to-live: 10m
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+      show-components: always
+
+info:
+  app:
+    name: My online store
+    version: 1.0.0
+
+payment:
+  service:
+    url: ${PAYMENT_SERVICE_URL:http://localhost:8081}

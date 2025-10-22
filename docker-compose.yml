@@ -1,0 +1,109 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7.4.5-alpine3.21
+    container_name: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - store-network
+
+  store:
+    build:
+      context: .
+      dockerfile: store/Dockerfile
+    container_name: store
+    ports:
+      - "8075:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+    entrypoint: ["sh", "-c", "sleep 15 && java -jar /app/app.jar"]
+    environment:
+      OAUTH2_AUTHORIZATION_URI: http://localhost:9090/realms/store-realm/protocol/openid-connect/auth
+      OAUTH2_TOKEN_URI: http://host.docker.internal:9090/realms/store-realm/protocol/openid-connect/token
+      OAUTH2_USER_INFO_URI: http://host.docker.internal:9090/realms/store-realm/protocol/openid-connect/userinfo
+      OAUTH2_JWK_SET_URI: http://host.docker.internal:9090/realms/store-realm/protocol/openid-connect/certs
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      PAYMENT_SERVICE_URL: http://payments:8081
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - store-network
+
+  payments:
+    build:
+      context: .
+      dockerfile: payments/Dockerfile
+    container_name: payments
+    ports:
+        - "8081:8081"
+    depends_on:
+      - keycloak
+    environment:
+      OAUTH2_JWK_SET_URI: http://host.docker.internal:9090/realms/store-realm/protocol/openid-connect/certs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - store-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: keycloak
+    restart: always
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME_URL: http://localhost:9090
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_PROXY: edge
+      KC_DB: postgres
+      KC_DB_URL_HOST: keycloak-postgres
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+    command:
+      - start-dev
+      - --import-realm
+    ports:
+      - "9090:8080"
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+    networks:
+      - store-network
+    depends_on:
+      keycloak-postgres:
+        condition: service_healthy
+
+  keycloak-postgres:
+    image: postgres:16
+    container_name: keycloak-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    volumes:
+      - ./postgres/keycloak_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - store-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U keycloak -d keycloak" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+
+networks:
+  store-network:

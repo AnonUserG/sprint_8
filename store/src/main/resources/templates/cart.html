@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Корзина товаров</title>
+</head>
+
+<body>
+<div style="float:right;">
+    <div sec:authorize="isAuthenticated()">
+        <b th:text="${#authentication?.name}">user</b> |
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+            <button type="submit" style="background:none;border:none;color:blue;cursor:pointer;">
+                Выйти
+            </button>
+        </form>
+    </div>
+
+    <div sec:authorize="isAnonymous()">
+        <a href="/oauth2/authorization/keycloak">Войти</a>
+    </div>
+</div>
+
+<a th:href="@{/orders}" style="float:right;">
+    <b>ЗАКАЗЫ &cudarrr;</b>
+</a>
+<a th:href="@{/main/items}" style="float:right;">
+    <b>ГЛАВНАЯ &cudarrr;</b>
+</a>
+<table style="width:70%;margin-left:auto;margin-right:auto;">
+    <tr th:each="item : ${items}">
+        <td>
+            <table>
+                <tr>
+                    <td>
+                        <img width="300" height="300" th:src="@{${'/' + item.imgPath}}">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b th:text="${item.getTitle()}"></b>
+                    </td>
+                    <td>
+                        <b th:text="${item.getPrice()}+' руб.'"></b>
+                    </td>
+                </tr>
+                <tr><td th:text="${item.getDescription()}"></td></tr>
+                <tr>
+                    <td>
+                        <form th:action="@{'/cart/items/' + ${item.id}}" method="post">
+                            <button name="action" value="minus">-</button>
+                            <span th:text="${itemsCount[item.id]}"></span>
+                            <button name="action" value="plus">+</button>
+                            <button name="action" value="delete" style="float:right;">&cross;</button>
+                        </form>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td style="text-align:right">
+            <b th:text="'Итого: '+${total}+' руб.'"></b>
+        </td>
+    </tr>
+    <td style="text-align:right">
+        <form th:action="@{/orders/buy}" method="post">
+            <button th:disabled="${!canBuy or !paymentServiceAvailable}">Купить</button>
+        </form>
+
+        <p th:if="${!paymentServiceAvailable}" style="color:red;">
+            Платёжный сервис недоступен
+        </p>
+
+        <p th:if="${paymentServiceAvailable and !canBuy}" style="color:red;">
+            Недостаточно средств
+        </p>
+    </td>
+
+</table>
+</body>
+
+</html>

@@ -1,0 +1,99 @@
+{
+  "realm": "store-realm",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "customer",
+        "description": "Покупатель"
+      },
+      {
+        "name": "admin",
+        "description": "Администратор"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "store-client",
+      "name": "Store Client",
+      "rootUrl": "http://localhost:8075",
+      "redirectUris": ["http://localhost:8080/*",
+                       "http://localhost:8075/*",
+                       "http://127.0.0.1:8075/*"],
+      "webOrigins": ["+"],
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "protocolMappers": [
+        {
+          "name": "realm roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "config": {
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "claim.name": "realm_access.roles",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-client-role-mapper",
+          "config": {
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "claim.name": "roles",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "payments-api",
+      "name": "Payments API",
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "secret": "payments-secret",
+      "authorizationServicesEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": false
+    }
+
+  ],
+  "users": [
+    {
+      "username": "customer",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Customer",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["customer"]
+    },
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Admin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["admin"]
+    }
+  ]
+}

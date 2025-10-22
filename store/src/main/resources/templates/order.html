@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Заказ</title>
+</head>
+
+<body>
+<div style="float:right;">
+    <div sec:authorize="isAuthenticated()">
+        <b th:text="${#authentication?.name}">user</b> |
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+            <button type="submit" style="background:none;border:none;color:blue;cursor:pointer;">
+                Выйти
+            </button>
+        </form>
+    </div>
+
+    <div sec:authorize="isAnonymous()">
+        <a href="/oauth2/authorization/keycloak">Войти</a>
+    </div>
+</div>
+
+<a th:href="@{/orders}" style="float:right;">
+    <b>ЗАКАЗЫ &cudarrr;</b>
+</a>
+<a th:href="@{/cart/items}" style="float:right;">
+    <b>КОРЗИНА &cudarrr;</b>
+</a>
+<a th:href="@{/main/items}" style="float:right;">
+    <b>ГЛАВНАЯ &cudarrr;</b>
+</a>
+<h1 style="text-align:center" th:if="${newOrder}">Поздравляем! Успешная покупка! &#128578;</h1>
+<table style="width:70%;margin-left:auto;margin-right:auto;">
+    <tr>
+        <td>
+            <h2 th:text="'Заказ №'+${order.id}"></h2>
+        </td>
+    </tr>
+    <tr th:each="entry : ${items}">
+        <td>
+            <table>
+                <tr>
+                    <td>
+                        <a th:href="@{'/items/' + ${entry.item.id}}">
+                            <img width="300" height="300" th:src="@{${'/' + entry.item.imgPath}}">
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b th:text="${entry.item.title}"></b>
+                    </td>
+                    <td>
+                        <b th:text="${entry.count}+' шт.'"></b>
+                    </td>
+                    <td>
+                        <b th:text="${entry.price.multiply(T(java.math.BigDecimal).valueOf(entry.count.longValue()))} + ' руб.'"></b>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <h3 th:text="'Сумма: '+${total}+' руб.'"></h3>
+        </td>
+    </tr>
+</table>
+</body>
+
+</html>

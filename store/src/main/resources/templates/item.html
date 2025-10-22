@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Витрина товаров</title>
+</head>
+
+<body>
+<div style="float:right;">
+    <div sec:authorize="isAuthenticated()">
+        <b th:text="${#authentication?.name}">user</b> |
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+            <button type="submit" style="background:none;border:none;color:blue;cursor:pointer;">
+                Выйти
+            </button>
+        </form>
+    </div>
+
+    <div sec:authorize="isAnonymous()">
+        <a href="/oauth2/authorization/keycloak">Войти</a>
+    </div>
+</div>
+
+    <a th:href="@{/orders}" style="float:right;">
+        <b>ЗАКАЗЫ &cudarrr;</b>
+    </a>
+    <a th:href="@{/cart/items}" style="float:right;">
+        <b>КОРЗИНА &cudarrr;</b>
+    </a>
+    <a th:href="@{/main/items}" style="float:right;">
+        <b>ГЛАВНАЯ &cudarrr;</b>
+    </a>
+    <div style="width:70%;margin-left:auto;margin-right:auto;">
+        <p>
+            <img width="300" height="300" th:src="@{${'/' + item.imgPath}}">
+        </p>
+        <p>
+            <b th:text="${item.getTitle()}"></b>
+            <b th:text="${item.getPrice()}+' руб.'" style="text-align:right;"></b>
+        </p>
+        <p>
+            <span th:text="${item.getDescription()}"></span>
+        </p>
+        <form th:action="@{'/items/' + ${item.id}}" method="post">
+            <button name="action" value="minus">-</button>
+            <span th:text="${itemsCount[item.id]} != null ? ${itemsCount[item.id]} : 0"></span>
+            <button name="action" value="plus">+</button>
+            <button name="action" value="plus" th:if="${item.getCount()==0}" style="float:right;">В корзину</button>
+        </form>
+    </div>
+</body>
+
+</html>
