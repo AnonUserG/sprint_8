@@ -92,7 +92,7 @@ services:
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: keycloak
     volumes:
-      - ./postgres/keycloak_data:/var/lib/postgresql/data
+      - keycloak_data:/var/lib/postgresql/data
     ports:
       - "5433:5432"
     networks:
@@ -104,6 +104,8 @@ services:
       retries: 10
       start_period: 30s
 
+volumes:
+  keycloak_data:
 
 networks:
   store-network:
